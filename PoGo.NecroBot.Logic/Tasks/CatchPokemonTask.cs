@@ -83,6 +83,32 @@ namespace PoGo.NecroBot.Logic.Tasks
 
             CatchPokemonResponse caughtPokemonResponse;
             var attemptCounter = 1;
+
+
+            var myPokemon = await session.Inventory.GetPokemons();
+            var myPokemonList = myPokemon.ToList();
+            bool bolExistPokemon = false;
+            var pokemonId = encounter is EncounterResponse
+            ? encounter.WildPokemon?.PokemonData?.PokemonId
+            : encounter?.PokemonData?.PokemonId;
+            foreach (var itemPokemon in myPokemonList)
+            {
+                if(itemPokemon.PokemonId == pokemonId)
+                {
+                    bolExistPokemon = true;
+                }
+            }
+            if(bolExistPokemon == true)
+            {
+                if (pokemonCp < 1000 || pokemonIv < 80)
+                {
+
+                    DelayingUtils.Delay(session.LogicSettings.DelayBetweenPokemonCatch, 0);
+                    Logger.Write("CP : " + pokemonCp + " IV : " + pokemonIv + " 太低不抓，寶貝名稱 : " + pokemonId);
+                    return;
+                }
+            }
+
             do
             {
                 if ((session.LogicSettings.MaxPokeballsPerPokemon > 0 &&
